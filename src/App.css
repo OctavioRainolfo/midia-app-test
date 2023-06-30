@@ -1,31 +1,157 @@
 .container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    align-items: start;
     justify-content: start;
-    height: 100vh;
+    min-height: 100vh;
+    width: 100%;
+    background-color: #2b2b2b;
 }
 
-.box {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+.image-management-demo {
     width: 100%;
     height: 100%;
-}
-
-.boxImage {
-    height: 100%;
+    font-family: Arial, sans-serif;
+    color: #f4f4f4;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
+    gap: 1em;
     display: flex;
-    align-items: center;
-    justify-content: start;
     flex-direction: column;
-}
-
-.code {
-    width: 100%;
-    display: flex;
     align-items: center;
     justify-content: center;
-    flex-direction: column; 
-}
+
+  }
+  
+  .image-management-demo h2 {
+    text-align: center;
+    color: #ddd;
+  }
+  
+  .upload-section,
+  .images-section,
+  .info-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 90%;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
+    background: #444;
+    gap: 1em;
+    padding: 10px;
+  }
+
+  .upload-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 80%;
+    height: 100%;
+    gap: 1em;
+  }
+  
+  .upload-section h3,
+  .images-section h3,
+  .info-section h3 {
+    margin-bottom: 10px;
+    color: #ddd;
+  }
+  
+  .image-card {
+    display: flex;
+    align-items: center;
+    width: 50%;
+    padding: 10px;
+    justify-content: space-between;
+    background: #333;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
+  }
+  
+  .image-card p {
+    margin-right: 10px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: pointer;
+    width: 80%;
+  }
+  
+  .image-card button {
+    border: none;
+    background: #337ab7;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+    padding: 10px;
+  }
+  
+  .image-card button:hover {
+    background: #286090;
+  }
+  
+  .upload-section input[type="file"],
+  .upload-section input[type="text"] {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 80%;
+    color: #ddd;
+    background: #222;
+  }
+  
+  .upload-section button {
+    display: block;
+    width: 30%;
+    border: none;
+    background: #5cb85c;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s;
+    padding: 10px;
+  }
+  
+  .upload-section button:hover {
+    background: #449d44;
+  }
+  
+  .info-section p {
+    color: #ddd;
+  }
+  
+  input[type="text"] {
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    width: 100%;
+    color: #ddd;
+    background: #222;
+    padding: 0;
+
+  }
+
+  .downloadedImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  
+  .buttons-section {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    width: 20%;
+    gap: 1em;
+  }
+  
+  .image-info-section {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    width: 80%;
+  }
