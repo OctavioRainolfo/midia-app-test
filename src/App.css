@@ -1,157 +1,332 @@
 .container {
-    display: flex;
-    align-items: start;
-    justify-content: start;
-    min-height: 100vh;
-    width: 100%;
-    background-color: #2b2b2b;
+  display: grid;
+  min-height: 100vh;
 }
 
 .image-management-demo {
-    width: 100%;
-    height: 100%;
-    font-family: Arial, sans-serif;
-    color: #f4f4f4;
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
-    gap: 1em;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: Arial, sans-serif;
+  color: #f4f4f4;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+  background-color: #2b2b2b;
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  place-items: center;
+  gap: 1em;
+}
 
-  }
-  
-  .image-management-demo h2 {
-    text-align: center;
-    color: #ddd;
-  }
-  
-  .upload-section,
-  .images-section,
-  .info-section {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 90%;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
-    background: #444;
-    gap: 1em;
-    padding: 10px;
-  }
+.image-management-demo h2 {
+  text-align: center;
+  color: #ddd;
+}
 
-  .upload-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 80%;
-    height: 100%;
-    gap: 1em;
-  }
-  
-  .upload-section h3,
-  .images-section h3,
-  .info-section h3 {
-    margin-bottom: 10px;
-    color: #ddd;
-  }
-  
+.images-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1em;
+  width: 90%;
+  margin-bottom: 1em;
+}
+
+.box-container {
+  background: #444;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  border-radius: 5px;
+}
+
+.upload-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  margin-top: 1em;
+}
+
+.info-section {
+  display: grid;
+  grid-template-rows: .01fr .01fr 1fr;
+  place-items: center;
+  justify-items: center;
+  max-height: 500px;
+  gap: 1em;
+  background-color: #444;
+  border-radius: 5px;
+  padding-bottom: 10px;
+
+}
+
+.images-section {
+  display: grid;
+  grid-template-rows: 1fr;
+  gap: 1em;
+  place-items: center;
+  background-color: #444;
+  border-radius: 5px;
+  padding-bottom: 10px;
+  height: 100%;
+}
+
+.map-cards-container {
+  display: grid;
+  grid-gap: 1em;
+  place-items: center;
+  background-color: #444;
+  border-radius: 5px;
+  padding-bottom: 10px;
+  height: 100%;
+  width: 100%;
+}
+
+.upload-section h2 {
+  border-bottom: 1px solid #ddd;
+  display: flex;
+  align-items: stretch;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  margin: 0;
+  padding: 10px;
+}
+
+.upload-form {
+  display: grid;
+  grid-template-rows: .1fr 1fr;
+  width: 90%;
+  height: 100%;
+  gap: 1em;
+  padding-bottom: 1em;
+}
+
+.userCode-form {
+  display: grid;
+  grid-template-rows: .4fr 1fr 1fr;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.uploadImage-form {
+  display: grid;
+  grid-template-rows: .4fr 1fr 1fr;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.box-input {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  place-items: center;
+  width: 100%;
+}
+
+.upload-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  place-items: center;
+  gap: 1em;
+  width: 100%;
+}
+
+.upload-section h3,
+.images-section h3,
+.info-section h3 {
+  margin-bottom: 10px;
+  color: #ddd;
+}
+
+.image-card {
+  width: 90%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 1fr;
+  background: #333;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+}
+
+.image-card p {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+.image-card button {
+  border: none;
+  background: #337ab7;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+  height: 35px;
+  max-width: 70px;
+  width: 100%;
+}
+
+.image-card button:hover {
+  background: #286090;
+}
+
+.upload-section input[type="file"],
+.upload-section input[type="text"] {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 80%;
+  color: #ddd;
+  background: #222;
+}
+
+.upload-section button {
+  display: block;
+  width: 30%;
+  border: none;
+  background: #5cb85c;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+  padding: 10px;
+}
+
+.upload-section button:hover {
+  background: #449d44;
+}
+
+.info-section p {
+  color: #ddd;
+}
+
+input[type="text"] {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 100%;
+  color: #ddd;
+  background: #222;
+  padding: 0;
+
+}
+
+.downloaded-image {
+  width: 90%;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+  display: grid;
+  place-items: start;
+  justify-items: center;
+}
+
+.downloaded-image img {
+  width: 90%;
+  height: 90%;
+  max-height: 300px;
+  object-fit: cover;
+  margin: 1em 0 0 0;
+}
+
+.buttons-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  padding: 0.5em;
+}
+
+.image-info-section {
+  display: grid;
+  grid-template-rows: 1fr;
+  place-items: center;
+  padding: 0.5em;
+  gap: 1em;
+  height: 80px;
+}
+
+.image-info-section input {
+  width: 50%;
+  gap: 1em;
+  padding: 0.5em;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  color: #ddd;
+  background: #222;
+}
+
+.wrap-input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1em;
+  width: 100%;
+}
+
+@media screen and (max-width: 768px) {
   .image-card {
-    display: flex;
-    align-items: center;
-    width: 50%;
-    padding: 10px;
-    justify-content: space-between;
-    background: #333;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.3);
-  }
-  
-  .image-card p {
-    margin-right: 10px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    cursor: pointer;
-    width: 80%;
-  }
-  
-  .image-card button {
-    border: none;
-    background: #337ab7;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-    padding: 10px;
-  }
-  
-  .image-card button:hover {
-    background: #286090;
-  }
-  
-  .upload-section input[type="file"],
-  .upload-section input[type="text"] {
-    margin-bottom: 10px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    width: 80%;
-    color: #ddd;
-    background: #222;
-  }
-  
-  .upload-section button {
-    display: block;
-    width: 30%;
-    border: none;
-    background: #5cb85c;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background 0.3s;
-    padding: 10px;
-  }
-  
-  .upload-section button:hover {
-    background: #449d44;
-  }
-  
-  .info-section p {
-    color: #ddd;
-  }
-  
-  input[type="text"] {
-    margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    width: 100%;
-    color: #ddd;
-    background: #222;
-    padding: 0;
-
+    grid-template-columns: 1fr;
   }
 
-  .downloadedImage {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
   .buttons-section {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    width: 20%;
-    gap: 1em;
+    flex-direction: row;
   }
-  
+
   .image-info-section {
-    display: flex;
-    justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    width: 80%;
+    text-align: center;
   }
+
+  .images-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+
+  .map-cards-container {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+@media screen and (max-width:428px) {
+  .buttons-section {
+    gap: 0.5em;
+  }
+
+  .wrap-input {
+    flex-direction: column;
+    gap: 0.5em;
+  }
+
+  .wrap-input input {
+    width: 90%;
+  }
+
+  .images-container {
+    gap: .5em;
+  }
+}
+
+.wrap-mini-image {
+  display: grid;
+  place-items: center;
+  width: 90%;
+  height: 90%;
+  text-align: center;
+}
+
+.mini-image img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 5px;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.3);
+}
+
+.wrap-name {
+  display: grid;
+  place-items: center;
+  width: 90%;
+  grid-template-rows: 1fr 1fr;
+}
