@@ -34,10 +34,18 @@ function ImageManagementDemo() {
     const searchImages = async (code?: string) => {
         const verifyCode = code ? code : userCode;
         if (!verifyCode) return;
-        await getMidias(verifyCode, setImages).then(() => {
-            getAllImages(verifyCode, images, setDownloadedImages);
-        }
-        );
+        await getMidias(verifyCode).then((response) => {
+            if (response) {
+                const imageResponse = response;
+                const filteredImages = imageResponse.filter((image: ImageInfo) => !image.deletado);
+                setImages(filteredImages);
+            } else {
+                alert('No images found for this user.');
+            }
+        })
+            .catch((error) => {
+                console.log(error);
+            });
     }
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,7 +55,9 @@ function ImageManagementDemo() {
     }
 
     const handleDownloadImages = async () => {
-        getAllImages(userCode, images, setDownloadedImages)
+        await getAllImages(userCode, images).then((response) => {
+            response && setDownloadedImages(response);
+        })
     }
 
     const searchByName = (image: ImageInfo) => {

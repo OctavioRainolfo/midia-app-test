@@ -20,61 +20,51 @@ export const apiUsuario = axios.create({
 });
 
 
-//Get's from Midia API
+//Get's from Midia API ImageInfo[] 
 
-export const getMidias = async (verifyCode: string, callback: (images: ImageInfo[]) => void) => {
-    apiMidia.get(`buscaArquivosUsuario/${verifyCode}`)
-        .then((response) => {
-            if (response.data) {
-                const imageResponse = response.data;
-                const filteredImages = imageResponse.filter((image: ImageInfo) => !image.deletado);
-                callback(filteredImages);
-            } else {
-                alert('No images found for this user.');
-            }
-        })
-        .catch((error) => {
-            console.log(error);
-        });
+export const getMidias = async (verifyCode: string): Promise<ImageInfo[]> => {
+    return apiMidia.get(`buscaArquivosUsuario/${verifyCode}`)
 }
 
 export const getSingleImage = async (
     image: ImageInfo,
     userCode: string,
 ): Promise<ImageInfo> => {
-    return new Promise((resolve, reject) => {
-        apiMidia.get(`verArquivo/${image.url}/${userCode}`, {
-            responseType: 'arraybuffer' // informe ao axios que estamos esperando dados binários
-        }).then((response) => {
-
-            // Criar um Blob a partir dos dados binários
-            const blob = new Blob([response.data], { type: 'image/png' });
-            // Criar um URL Object a partir do Blob
-            const imageUrl = {
-                url: URL.createObjectURL(blob),
-                nome: image.nome,
-                arquivoId: image.arquivoId,
+    try {
+        const response = await apiMidia.get<ArrayBuffer>(
+            `verArquivo/${image.url}/${userCode}`,
+            {
+                responseType: 'arraybuffer', // informe ao axios que estamos esperando dados binários
             }
-            resolve(imageUrl);
-        })
-            .catch((error) => {
-                reject(error);
-            });
+        );
+
+        // Criar um Blob a partir dos dados binários
+        const blob = new Blob([response.data], { type: 'image/png' });
+        // Criar um URL Object a partir do Blob
+        const imageUrl = {
+            url: URL.createObjectURL(blob),
+            nome: image.nome,
+            arquivoId: image.arquivoId,
+        };
+
+        return imageUrl;
+    } catch (error) {
+        // Handle any errors that might occur during the API call
+        throw error;
     }
-    )
-}
+};
 
 export const getAllImages = async (
     userCode: string,
-    array: ImageInfo[],
-    callback: (image: ImageInfo[]) => void
-) => {
+    array: ImageInfo[]
+): Promise<ImageInfo[]> => {
     try {
         const newArray = await Promise.all(array.map((image) => getSingleImage(image, userCode)));
-        callback(newArray);
+        return newArray;
     } catch (error) {
         console.log(error);
     }
+    return [];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -84,7 +74,7 @@ export const getUser = async (verifyCode: string, callback: (user: any) => void)
     apiUsuario.get(`validarUsuario/` + verifyCode)
         .then(response => {
             if (response.data) {
-                getMidias(verifyCode, callback);
+                getMidias(verifyCode);
             }
             if (!response.data) {
                 // If user does not exist, create user
@@ -112,7 +102,7 @@ export const postImage = async (verifyCode: string,
         .then((response: { status: number; }) => {
             if (response.status === 200) {
                 alert('Image uploaded successfully!');
-                getMidias(verifyCode, callback);
+                getMidias(verifyCode);
             }
         }).catch((error) => {
             console.log(error);
@@ -128,7 +118,7 @@ export const postImageName = async (verifyCode: string,
         .then((response: { status: number; }) => {
             if (response.status === 200) {
                 alert('Image with name uploaded successfully!');
-                getMidias(verifyCode, callback);
+                getMidias(verifyCode);
             }
         }).catch((error) => {
             console.log(error);
@@ -151,7 +141,7 @@ export const patchName = async (verifyCode: string,
         }
     }).then(response => {
         if (response.status === 200) {
-            getMidias(verifyCode, callback);
+            getMidias(verifyCode);
         } else {
             alert('Error saving user. Please try again.');
         }
@@ -168,12 +158,12 @@ export const patchName = async (verifyCode: string,
 export const deleteImage = async (verifyCode: string,
     url: string,
     callback: (image: ImageInfo[]) => void
-    ) => {
+) => {
     apiMidia.delete(`deletarArquivo/${url}/${verifyCode}`)
         .then((response) => {
             if (response.status === 200) {
                 alert('Image deleted successfully!');
-                getMidias(verifyCode, callback);
+                getMidias(verifyCode);
             }
         }).catch((error) => {
             console.log(error);
