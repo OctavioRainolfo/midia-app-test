@@ -1,17 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { postImage, getMidias, deleteImage, getAllImages, postImageName, getUser, patchName } from './api';
+import { postImage, getMidias, deleteImage, getAllImages, postImageName, validateUser, saveUser, patchName } from './api';
 import './App.css';
-
-interface ImageInfo {
-    arquivoId?: number;
-    nome: string;
-    tipo?: string;
-    url: string;
-    dataCriacao?: string;
-    dataAtualizacao?: string;
-    deletado?: boolean;
-}
-
+import { ImageInfo } from './api';
 
 function ImageManagementDemo() {
     const [images, setImages] = useState<ImageInfo[]>([]);
@@ -21,22 +11,40 @@ function ImageManagementDemo() {
     const [editFileName, setEditFileName] = useState('');
     const [userCode, setUserCode] = useState('');
     const [downloadedImages, setDownloadedImages] = useState<ImageInfo[]>([]);
-    const [toggleEdit, setToggleEdit] = useState<boolean[]>([]);
-    const [updateImages, setUpdateImages] = useState(false);
+    const [activeEditIndex, setActiveEditIndex] = useState<number | null>(null);
 
     const imgRef = useRef<HTMLImageElement | null>(null);
 
-    const validateUser = (code?: string) => {
+    const postSaveUser = async (verifyCode: string) => {
+        await saveUser(verifyCode).then((response) => {
+            if (response.status === 200) {
+                localStorage.setItem('userCode', verifyCode);
+            } else {
+                alert(response);
+            }
+        });
+    }
+
+    const verifyUser = async (code?: string) => {
         const verifyCode = code ? code : userCode;
-        getUser(verifyCode, setImages);
+        await validateUser(verifyCode).then(response => {
+            if (response) {
+                searchImages(verifyCode);
+            }
+            if (!response) {
+                // If user does not exist, create user
+                postSaveUser(verifyCode);
+            }
+            localStorage.setItem('userCode', verifyCode);
+        });
     }
 
     const searchImages = async (code?: string) => {
         const verifyCode = code ? code : userCode;
         if (!verifyCode) return;
-        await getMidias(verifyCode).then((response) => {
+        await getMidias(verifyCode).then((response: any) => {
             if (response) {
-                const imageResponse = response;
+                const imageResponse = response.data;
                 const filteredImages = imageResponse.filter((image: ImageInfo) => !image.deletado);
                 setImages(filteredImages);
             } else {
@@ -60,17 +68,6 @@ function ImageManagementDemo() {
         })
     }
 
-    const searchByName = (image: ImageInfo) => {
-        var temp = downloadedImages.find((img) => img.nome === image.nome);
-        return temp;
-    }
-
-    const searchByUrl = (image: ImageInfo) => {
-        var tempDownloaded = downloadedImages.find((img) => img.url === image.url);
-        var temp = images.find((img) => img.nome === tempDownloaded?.nome);
-        return temp;
-    }
-
     const searchById = (image: ImageInfo) => {
         var temp = images.find((img) => img.arquivoId === image.arquivoId);
         return temp;
@@ -86,29 +83,39 @@ function ImageManagementDemo() {
         return temp?.url;
     }
 
-    const handleToggleEdit = (index: number) => {
+    const toggleEdit = (index: number) => {
+        if (activeEditIndex === index) setActiveEditIndex(null);
+        else setActiveEditIndex(index);
         setEditFileName(images[index].nome);
-        setToggleEdit((prevToggleEdit) => {
-            const updatedToggleEdit = [...prevToggleEdit];
-            updatedToggleEdit[index] = !updatedToggleEdit[index];
-            return updatedToggleEdit;
-        });
     };
 
-    const handleEditName = (image: ImageInfo, index: number) => {
+    const handleEditName = async (image: ImageInfo, index: number) => {
         var searchedId = searchById(image);
         if (searchedId) {
-            patchName(userCode, searchedId.url, setImages, editFileName)
-            handleToggleEdit(index);
+            await patchName(userCode, searchedId.url, editFileName).then(response => {
+                searchImages();
+            }).catch((error) => {
+                alert('Error saving user. Please try again.');
+                console.log(error);
+            }
+            );
+            setActiveEditIndex(null);
         }
     };
 
-    const uploadImage = () => {
+    const uploadImage = async () => {
         if (uploadFile) {
             let formData = new FormData();
             formData.append('file', uploadFile);
             if (userCode) {
-                postImage(userCode, formData, setImages);
+                await postImage(userCode, formData)
+                    .then(() => {
+                        alert('Image uploaded successfully!');
+                        getMidias(userCode);
+
+                    }).catch((error) => {
+                        console.log(error);
+                    });
             } else {
                 alert('Please enter user code.');
             }
@@ -122,8 +129,13 @@ function ImageManagementDemo() {
             let formData = new FormData();
             formData.append('file', uploadFile);
             if (userCode) {
-                console.log(userCode, uploadFile);
-                postImageName(userCode, formData, uploadFileName, setImages)
+                postImageName(userCode, formData, uploadFileName)
+                    .then(() => {
+                        alert('Image with name uploaded successfully!');
+                        getMidias(userCode);
+                    }).catch((error) => {
+                        console.log(error);
+                    });
             }
         }
     }
@@ -131,7 +143,6 @@ function ImageManagementDemo() {
     //useRef to get the image and scroll to it
     const selectAndScroll = async (image: ImageInfo) => {
         var searchedId = searchDownloadedById(image);
-        console.log(searchedId);
         if (searchedId) {
             setSelectedImage(searchedId);
             const img = imgRef.current;
@@ -142,17 +153,23 @@ function ImageManagementDemo() {
     }
 
     //get the url of the image and delete it
-    const handleDeleteImage = (image: ImageInfo) => {
+    const handleDeleteImage = async (image: ImageInfo) => {
         var imageId = searchById(image);
-        console.log(imageId);
         if (imageId) {
-            deleteImage(userCode, imageId.url, setImages);
+            await deleteImage(userCode, imageId.url).then((response) => {
+                if (response.status === 200) {
+                    alert('Image deleted successfully!');
+                   searchImages();
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+
         }
     }
 
     useEffect(() => {
         handleDownloadImages();
-        console.log('downloadedImages')
     }, [images])
 
     useEffect(() => {
@@ -165,17 +182,9 @@ function ImageManagementDemo() {
         var userCode = localStorage.getItem('userCode');
         if (userCode) {
             setUserCode(userCode);
-            validateUser(userCode);
+            verifyUser(userCode);
         }
     }, [userCode]);
-
-    useEffect(() => {
-        if (updateImages) {
-            searchImages();
-            setUpdateImages(false);
-            console.log('update');
-        }
-    }, [updateImages]);
 
     return (
         <div className="container">
@@ -191,7 +200,7 @@ function ImageManagementDemo() {
                                 <h3>User Code</h3>
                                 <input type="text" placeholder="Enter user code" value={userCode} onChange={e => setUserCode(e.target.value)} />
                                 <button onClick={() => {
-                                    validateUser();
+                                    verifyUser();
                                 }}>Search Images</button>
                             </div>
 
@@ -219,34 +228,32 @@ function ImageManagementDemo() {
                                 <div key={index} className="image-card">
                                     <div className='image-info-section'>
 
-                                        <div className='wrap-mini-image'>
 
-                                            <div className='mini-image'>
-                                                <img src={
-                                                    handleFindImage(image)
-                                                } alt={image.nome}
-                                                    onClick={() =>
-                                                        selectAndScroll(image)
-                                                    }
-                                                />
-                                            </div>
-
-                                            {toggleEdit[index] ? (
-                                                <div className='wrap-input'>
-                                                    <input type="text" value={editFileName} onChange={e => setEditFileName(e.target.value)} />
-                                                    <button onClick={() => {
-                                                        handleEditName(image, index);
-                                                    }}>Save</button>
-                                                </div>
-                                            ) : (
-                                                <p>{image.nome}</p>
-                                            )}
+                                        <div className='mini-image'>
+                                            <img src={
+                                                handleFindImage(image)
+                                            } alt={image.nome}
+                                                onClick={() =>
+                                                    selectAndScroll(image)
+                                                }
+                                            />
                                         </div>
+
+                                        {activeEditIndex === index ? (
+                                            <div className='wrap-input'>
+                                                <input type="text" value={editFileName} onChange={e => setEditFileName(e.target.value)} />
+                                                <button onClick={() => {
+                                                    handleEditName(image, index);
+                                                }}>Save</button>
+                                            </div>
+                                        ) : (
+                                            <p>{image.nome}</p>
+                                        )}
 
                                     </div>
                                     <div className='buttons-section'>
                                         <button onClick={() =>
-                                            handleToggleEdit(index)
+                                            toggleEdit(index)
                                         }>Edit</button>
                                         <button onClick={
                                             () => handleDeleteImage(image)
@@ -257,7 +264,7 @@ function ImageManagementDemo() {
                         </div>
                     </div>
 
-                    <div className="info-section">
+                    <div className="info-section" ref={imgRef}>
                         <h3>Image Information</h3>
                         <p><strong>Nome:</strong> {selectedImage?.nome}</p>
 
@@ -265,7 +272,7 @@ function ImageManagementDemo() {
                             {selectedImage && <img
                                 className="selected-image"
                                 src={selectedImage.url} alt="downloaded"
-                                ref={imgRef}
+
                             />}
                         </div>
 

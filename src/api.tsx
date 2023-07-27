@@ -1,8 +1,7 @@
 import axios from 'axios';
-import { Dispatch, SetStateAction } from 'react';
 
-interface ImageInfo {
-    arquivoId?: number;
+export interface ImageInfo {
+    arquivoId: number;
     nome: string;
     tipo?: string;
     url: string;
@@ -31,23 +30,24 @@ export const getSingleImage = async (
     userCode: string,
 ): Promise<ImageInfo> => {
     try {
-        const response = await apiMidia.get<ArrayBuffer>(
+        return await apiMidia.get<ArrayBuffer>(
             `verArquivo/${image.url}/${userCode}`,
             {
                 responseType: 'arraybuffer', // informe ao axios que estamos esperando dados binários
             }
-        );
+        ).then((response) => {
 
-        // Criar um Blob a partir dos dados binários
-        const blob = new Blob([response.data], { type: 'image/png' });
-        // Criar um URL Object a partir do Blob
-        const imageUrl = {
-            url: URL.createObjectURL(blob),
-            nome: image.nome,
-            arquivoId: image.arquivoId,
-        };
+            // Criar um Blob a partir dos dados binários
+            const blob = new Blob([response.data], { type: 'image/png' });
+            // Criar um URL Object a partir do Blob
+            const imageUrl = {
+                url: URL.createObjectURL(blob),
+                nome: image.nome,
+                arquivoId: image.arquivoId,
+            };
 
-        return imageUrl;
+            return imageUrl;
+        });
     } catch (error) {
         // Handle any errors that might occur during the API call
         throw error;
@@ -70,85 +70,47 @@ export const getAllImages = async (
 ///////////////////////////////////////////////////////////////////////////////////
 // Get's from Usuario API
 
-export const getUser = async (verifyCode: string, callback: (user: any) => void) => {
-    apiUsuario.get(`validarUsuario/` + verifyCode)
-        .then(response => {
-            if (response.data) {
-                getMidias(verifyCode);
-            }
-            if (!response.data) {
-                // If user does not exist, create user
-                apiUsuario.post(`salvarUsuario/${verifyCode}`)
-                    .then(response => {
-                        if (response.status === 200) {
-                            localStorage.setItem('userCode', verifyCode);
-                        } else {
-                            alert('Error saving user. Please try again.');
-                        }
-                    });
-            }
-            localStorage.setItem('userCode', verifyCode);
-        });
+export const validateUser = (verifyCode: string): Promise<Boolean> => {
+    return apiUsuario.get(`validarUsuario/` + verifyCode)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
+// Post's from Usuario Api
+export const saveUser = async (verifyCode: string) => {
+    return apiUsuario.post(`salvarUsuario/${verifyCode}`)
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+
 // Post's from Midia API
 
 export const postImage = async (verifyCode: string,
-    formData: FormData,
-    callback: (images: ImageInfo[]) => void
+    formData: FormData
 ) => {
-    apiMidia.post(`salvarArquivo/${verifyCode}`, formData)
-        .then((response: { status: number; }) => {
-            if (response.status === 200) {
-                alert('Image uploaded successfully!');
-                getMidias(verifyCode);
-            }
-        }).catch((error) => {
-            console.log(error);
-        });
+    return apiMidia.post(`salvarArquivo/${verifyCode}`, formData)
+
 }
 
 export const postImageName = async (verifyCode: string,
     formData: FormData,
-    fileName: string,
-    callback: (images: ImageInfo[]) => void
+    fileName: string
 ) => {
-    apiMidia.post(`salvarArquivoNome/${fileName}/${verifyCode}`, formData)
-        .then((response: { status: number; }) => {
-            if (response.status === 200) {
-                alert('Image with name uploaded successfully!');
-                getMidias(verifyCode);
-            }
-        }).catch((error) => {
-            console.log(error);
-        });
+    return apiMidia.post(`salvarArquivoNome/${fileName}/${verifyCode}`, formData)
 }
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Patch's from Midia API
 
-export const patchName = async (verifyCode: string,
+export const patchName = (
+    verifyCode: string,
     url: string,
-    callback: (user: any) => void,
     newName: string) => {
-
-    console.log(newName);
-    await apiMidia.patch(`alterarNomeArquivo/${url}/${verifyCode}`, JSON.stringify(newName), {
+    return apiMidia.patch(`alterarNomeArquivo/${url}/${verifyCode}`, JSON.stringify(newName), {
         headers: {
             'Content-Type': 'application/json'
         }
-    }).then(response => {
-        if (response.status === 200) {
-            getMidias(verifyCode);
-        } else {
-            alert('Error saving user. Please try again.');
-        }
-    }).catch((error) => {
-        console.log(error);
-    }
-    );
+    })
 }
 
 
@@ -157,15 +119,6 @@ export const patchName = async (verifyCode: string,
 
 export const deleteImage = async (verifyCode: string,
     url: string,
-    callback: (image: ImageInfo[]) => void
 ) => {
-    apiMidia.delete(`deletarArquivo/${url}/${verifyCode}`)
-        .then((response) => {
-            if (response.status === 200) {
-                alert('Image deleted successfully!');
-                getMidias(verifyCode);
-            }
-        }).catch((error) => {
-            console.log(error);
-        });
+    return apiMidia.delete(`deletarArquivo/${url}/${verifyCode}`)
 }
