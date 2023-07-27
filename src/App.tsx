@@ -9,7 +9,8 @@ function ImageManagementDemo() {
     const [uploadFile, setUploadFile] = useState<File | null>(null);
     const [uploadFileName, setUploadFileName] = useState('');
     const [editFileName, setEditFileName] = useState('');
-    const [userCode, setUserCode] = useState('');
+    const [userCode, setUserCode] = useState(localStorage.getItem('userCode') || '');
+    const [newUserCode, setNewUserCode] = useState('');
     const [downloadedImages, setDownloadedImages] = useState<ImageInfo[]>([]);
     const [activeEditIndex, setActiveEditIndex] = useState<number | null>(null);
 
@@ -25,24 +26,31 @@ function ImageManagementDemo() {
         });
     }
 
+    const verifyCode = (code?: string) => {
+        return code ? code : userCode;
+    }
+
+
     const verifyUser = async (code?: string) => {
-        const verifyCode = code ? code : userCode;
-        await validateUser(verifyCode).then(response => {
+        const verifiedCode = verifyCode(code);
+        setSelectedImage(null);
+        await validateUser(verifiedCode).then(response => {
             if (response) {
-                searchImages(verifyCode);
+                setUserCode(verifiedCode);
+                searchImages(verifiedCode);
             }
             if (!response) {
                 // If user does not exist, create user
-                postSaveUser(verifyCode);
+                postSaveUser(verifiedCode);
             }
-            localStorage.setItem('userCode', verifyCode);
+            localStorage.setItem('userCode', verifiedCode);
         });
     }
 
     const searchImages = async (code?: string) => {
-        const verifyCode = code ? code : userCode;
-        if (!verifyCode) return;
-        await getMidias(verifyCode).then((response: any) => {
+        const verifiedCode = verifyCode(code);
+        if (!verifiedCode) return;
+        await getMidias(verifiedCode).then((response: any) => {
             if (response) {
                 const imageResponse = response.data;
                 const filteredImages = imageResponse.filter((image: ImageInfo) => !image.deletado);
@@ -108,35 +116,29 @@ function ImageManagementDemo() {
             let formData = new FormData();
             formData.append('file', uploadFile);
             if (userCode) {
-                await postImage(userCode, formData)
-                    .then(() => {
-                        alert('Image uploaded successfully!');
-                        getMidias(userCode);
+                if (uploadFileName === '') {
+                    await postImage(userCode, formData)
+                        .then(() => {
+                            alert('Image uploaded successfully!');
+                            searchImages();
 
-                    }).catch((error) => {
-                        console.log(error);
-                    });
+                        }).catch((error) => {
+                            console.log(error);
+                        });
+                } else {
+                    await postImageName(userCode, formData, uploadFileName)
+                        .then(() => {
+                            alert('Image with name uploaded successfully!');
+                            searchImages();
+                        }).catch((error) => {
+                            console.log(error);
+                        });
+                }
             } else {
                 alert('Please enter user code.');
             }
         } else {
             alert('Please select an image.');
-        }
-    }
-
-    const uploadImageWithName = () => {
-        if (uploadFile) {
-            let formData = new FormData();
-            formData.append('file', uploadFile);
-            if (userCode) {
-                postImageName(userCode, formData, uploadFileName)
-                    .then(() => {
-                        alert('Image with name uploaded successfully!');
-                        getMidias(userCode);
-                    }).catch((error) => {
-                        console.log(error);
-                    });
-            }
         }
     }
 
@@ -159,7 +161,7 @@ function ImageManagementDemo() {
             await deleteImage(userCode, imageId.url).then((response) => {
                 if (response.status === 200) {
                     alert('Image deleted successfully!');
-                   searchImages();
+                    searchImages();
                 }
             }).catch((error) => {
                 console.log(error);
@@ -179,12 +181,8 @@ function ImageManagementDemo() {
     }, [downloadedImages])
 
     useEffect(() => {
-        var userCode = localStorage.getItem('userCode');
-        if (userCode) {
-            setUserCode(userCode);
-            verifyUser(userCode);
-        }
-    }, [userCode]);
+        verifyUser();
+    }, [])
 
     return (
         <div className="container">
@@ -197,22 +195,19 @@ function ImageManagementDemo() {
                         <div className='upload-container'>
 
                             <div className='userCode-form'>
-                                <h3>User Code</h3>
-                                <input type="text" placeholder="Enter user code" value={userCode} onChange={e => setUserCode(e.target.value)} />
+                                <h3>User Code: {userCode}</h3>
+                                <input type="text" value={newUserCode} placeholder="Enter user code" onChange={e => setNewUserCode(e.target.value)} />
                                 <button onClick={() => {
-                                    verifyUser();
+                                    verifyUser(newUserCode);
                                 }}>Search Images</button>
                             </div>
 
                             <div className='uploadImage-form'>
                                 <h3>Upload Image</h3>
-                                <div className='box-input'>
-                                    <input type="file" onChange={handleFileUpload} />
-                                    <button onClick={uploadImage}>Upload</button>
-                                </div>
+                                <input type="file" onChange={handleFileUpload} />
                                 <div className='box-input'>
                                     <input type="text" placeholder="Enter file name" value={uploadFileName} onChange={e => setUploadFileName(e.target.value)} />
-                                    <button onClick={uploadImageWithName}>Upload with name</button>
+                                    <button onClick={uploadImage}>Upload</button>
                                 </div>
                             </div>
 
